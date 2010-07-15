@@ -1,0 +1,32 @@
+YAJLParserOperation is an NSOperation subclass for streaming JSON Parsing using YAJL.
+
+To use this in your project:
+1. Integrate the YAJL Library into your Objective C Project. You can find it at http://github.com/gabriel/yajl-objc
+2. Copy the .h and .m files into your project.
+3.
+a. Import.
+#import "YAJLParserOperation.h"
+
+b. Instantiate.
+
+YAJLParserOperation *feedParserOperation = [[YAJLParserOperation alloc] initWithURL:[NSURL URLWithString:@"http://some-url"]];
+[operationQueue addOperation:feedParserOperation];
+[feedParserOperation addObserver:self forKeyPath:@"isFinished" options:NSKeyValueObservingOptionNew context:NULL];
+
+c. Observe a notification when the parsing is done.
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
+{
+	if ([object isKindOfClass:[YAJLParserOperation class]]) {
+		YAJLParserOperation *feedParserOperation = (YAJLParserOperation *)object;
+		[feedParserOperation removeObserver:self forKeyPath:@"isFinished"];
+		if( [feedParserOperation error] ) {
+			NSLog(@"Failed!");
+		} 
+		else {
+			NSLog(@"Success!");
+			YAJLDocument *document = [[feedParserOperation document] retain];
+			// Now process document;
+		}
+	}
+}
+
